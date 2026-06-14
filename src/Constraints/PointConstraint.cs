@@ -415,3 +415,284 @@ public class FixationConstraint : SingleEntityConstraint
         }
     }
 }
+
+/// <summary>
+/// Midpoint constraint - a point is at the midpoint of a line
+/// </summary>
+public class MidpointConstraint : TwoEntityConstraint
+{
+    private readonly Exp _midX;
+    private readonly Exp _midY;
+
+    public MidpointConstraint(PointEntity point, LineEntity line)
+        : base(point, line)
+    {
+        // Midpoint X = (startX + endX) / 2
+        _midX = point.X - (line.Start.X + line.End.X) * Exp.one / Exp.two;
+        // Midpoint Y = (startY + endY) / 2
+        _midY = point.Y - (line.Start.Y + line.End.Y) * Exp.one / Exp.two;
+    }
+
+    public override string DisplayName => "Midpoint";
+
+    public override int DegreesOfFreedom => 2;
+
+    public override void SetupEquations(EquationSystem system)
+    {
+        if (entity1 is PointEntity p)
+        {
+            p.SetupEquations(system);
+        }
+        if (entity2 is LineEntity line)
+        {
+            line.SetupEquations(system);
+        }
+        system.AddEquation(_midX);
+        system.AddEquation(_midY);
+    }
+
+    public override void RemoveEquations(EquationSystem system)
+    {
+        if (entity1 is PointEntity p)
+        {
+            p.RemoveEquations(system);
+        }
+        if (entity2 is LineEntity line)
+        {
+            line.RemoveEquations(system);
+        }
+        system.RemoveEquation(_midX);
+        system.RemoveEquation(_midY);
+    }
+}
+
+/// <summary>
+/// Concentric constraint - two circles/arcs share the same center
+/// </summary>
+public class ConcentricConstraint : TwoEntityConstraint
+{
+    private readonly Exp _dx;
+    private readonly Exp _dy;
+
+    public ConcentricConstraint(CircleEntity c1, CircleEntity c2)
+        : base(c1, c2)
+    {
+        _dx = c1.Center.X - c2.Center.X;
+        _dy = c1.Center.Y - c2.Center.Y;
+    }
+
+    public ConcentricConstraint(ArcEntity a1, ArcEntity a2)
+        : base(a1, a2)
+    {
+        _dx = a1.Center.X - a2.Center.X;
+        _dy = a1.Center.Y - a2.Center.Y;
+    }
+
+    public ConcentricConstraint(CircleEntity circle, ArcEntity arc)
+        : base(circle, arc)
+    {
+        _dx = circle.Center.X - arc.Center.X;
+        _dy = circle.Center.Y - arc.Center.Y;
+    }
+
+    public override string DisplayName => "Concentric";
+
+    public override int DegreesOfFreedom => 2;
+
+    public override void SetupEquations(EquationSystem system)
+    {
+        if (entity1 is CircleEntity c1)
+        {
+            c1.SetupEquations(system);
+        }
+        else if (entity1 is ArcEntity a1)
+        {
+            a1.SetupEquations(system);
+        }
+
+        if (entity2 is CircleEntity c2)
+        {
+            c2.SetupEquations(system);
+        }
+        else if (entity2 is ArcEntity a2)
+        {
+            a2.SetupEquations(system);
+        }
+
+        system.AddEquation(_dx);
+        system.AddEquation(_dy);
+    }
+
+    public override void RemoveEquations(EquationSystem system)
+    {
+        if (entity1 is CircleEntity c1)
+        {
+            c1.RemoveEquations(system);
+        }
+        else if (entity1 is ArcEntity a1)
+        {
+            a1.RemoveEquations(system);
+        }
+
+        if (entity2 is CircleEntity c2)
+        {
+            c2.RemoveEquations(system);
+        }
+        else if (entity2 is ArcEntity a2)
+        {
+            a2.RemoveEquations(system);
+        }
+
+        system.RemoveEquation(_dx);
+        system.RemoveEquation(_dy);
+    }
+}
+
+/// <summary>
+/// Equal radius constraint - two circles/arcs have the same radius
+/// </summary>
+public class EqualRadiusConstraint : TwoEntityConstraint
+{
+    private readonly Exp _radiusDiff;
+
+    public EqualRadiusConstraint(CircleEntity c1, CircleEntity c2)
+        : base(c1, c2)
+    {
+        _radiusDiff = c1.Radius - c2.Radius;
+    }
+
+    public EqualRadiusConstraint(ArcEntity a1, ArcEntity a2)
+        : base(a1, a2)
+    {
+        _radiusDiff = a1.Radius - a2.Radius;
+    }
+
+    public EqualRadiusConstraint(CircleEntity circle, ArcEntity arc)
+        : base(circle, arc)
+    {
+        _radiusDiff = circle.Radius - arc.Radius;
+    }
+
+    public override string DisplayName => "Equal Radius";
+
+    public override int DegreesOfFreedom => 1;
+
+    public override void SetupEquations(EquationSystem system)
+    {
+        if (entity1 is CircleEntity c1)
+        {
+            c1.SetupEquations(system);
+        }
+        else if (entity1 is ArcEntity a1)
+        {
+            a1.SetupEquations(system);
+        }
+
+        if (entity2 is CircleEntity c2)
+        {
+            c2.SetupEquations(system);
+        }
+        else if (entity2 is ArcEntity a2)
+        {
+            a2.SetupEquations(system);
+        }
+
+        system.AddEquation(_radiusDiff);
+    }
+
+    public override void RemoveEquations(EquationSystem system)
+    {
+        if (entity1 is CircleEntity c1)
+        {
+            c1.RemoveEquations(system);
+        }
+        else if (entity1 is ArcEntity a1)
+        {
+            a1.RemoveEquations(system);
+        }
+
+        if (entity2 is CircleEntity c2)
+        {
+            c2.RemoveEquations(system);
+        }
+        else if (entity2 is ArcEntity a2)
+        {
+            a2.RemoveEquations(system);
+        }
+
+        system.RemoveEquation(_radiusDiff);
+    }
+}
+
+/// <summary>
+/// Symmetric constraint - two points are symmetric about a line
+/// </summary>
+public class SymmetricConstraint : TwoEntityConstraint
+{
+    private readonly Exp _symX;
+    private readonly Exp _symY;
+
+    public SymmetricConstraint(PointEntity p1, PointEntity p2, LineEntity axis)
+        : base(p1, p2)
+    {
+        // Get the normal vector of the axis line
+        var dirX = axis.End.X - axis.Start.X;
+        var dirY = axis.End.Y - axis.Start.Y;
+        var lenSq = dirX * dirX + dirY * dirY;
+        
+        // Project both points onto the axis and mirror
+        // The symmetric point should satisfy: (p1 + p2) / 2 is on the axis
+        // And (p2 - p1) is perpendicular to the axis
+        
+        // Simplified: The midpoint should be on the axis line
+        var midX = (p1.X + p2.X) * Exp.one / Exp.two;
+        var midY = (p1.Y + p2.Y) * Exp.one / Exp.two;
+        
+        // Cross product of (midpoint - start) and direction should be zero
+        _symX = (midX - axis.Start.X) * dirY - (midY - axis.Start.Y) * dirX;
+        
+        // Direction vector dot (p2 - p1) should be zero (perpendicular)
+        _symY = (p2.X - p1.X) * dirX + (p2.Y - p1.Y) * dirY;
+    }
+
+    public override string DisplayName => "Symmetric";
+
+    public override int DegreesOfFreedom => 2;
+
+    public override void SetupEquations(EquationSystem system)
+    {
+        if (entity1 is PointEntity p1)
+        {
+            p1.SetupEquations(system);
+        }
+        if (entity2 is PointEntity p2)
+        {
+            p2.SetupEquations(system);
+        }
+        if (GetType() == typeof(SymmetricConstraint))
+        {
+            // Find the axis line from the third entity slot
+            var entities = GetEntities().ToList();
+            if (entities.Count >= 3 && entities[2] is LineEntity axis)
+            {
+                axis.SetupEquations(system);
+            }
+        }
+        system.AddEquation(_symX);
+        system.AddEquation(_symY);
+    }
+
+    public override void RemoveEquations(EquationSystem system)
+    {
+        if (entity1 is PointEntity p1)
+        {
+            p1.RemoveEquations(system);
+        }
+        if (entity2 is PointEntity p2)
+        {
+            p2.RemoveEquations(system);
+        }
+        system.RemoveEquation(_symX);
+        system.RemoveEquation(_symY);
+    }
+}
