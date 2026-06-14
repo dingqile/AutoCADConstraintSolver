@@ -1,0 +1,109 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>AutoCADConstraintSolver</RootNamespace>
+    <AssemblyName>AutoCADConstraintSolver</AssemblyName>
+    <Version>1.0.0</Version>
+    <Authors>AutoCADConstraintSolver Contributors</Authors>
+    <Company>AutoCADConstraintSolver</Company>
+    <Product>AutoCAD Constraint Solver</Product>
+    <Description>A parametric constraint solver plugin for AutoCAD, ported from NoteCAD</Description>
+    <Copyright>Copyright (c) 2026</Copyright>
+    <PackageProjectUrl>https://github.com/dingqile/AutoCADConstraintSolver</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/dingqile/AutoCADConstraintSolver</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <!-- AutoCAD Version Configuration -->
+  <PropertyGroup Condition="'$(TargetAutoCAD)' == '2021'">
+    <AutoCADVersion>2021</AutoCADVersion>
+    <AcCoreMgdVersion>6.0.0</AcCoreMgdVersion>
+    <AcDbMgdVersion>6.0.0</AcDbMgdVersion>
+    <AcMgdVersion>6.0.0</AcMgdVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetAutoCAD)' == '2022'">
+    <AutoCADVersion>2022</AutoCADVersion>
+    <AcCoreMgdVersion>7.0.0</AcCoreMgdVersion>
+    <AcDbMgdVersion>7.0.0</AcDbMgdVersion>
+    <AcMgdVersion>7.0.0</AcMgdVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetAutoCAD)' == '2023'">
+    <AutoCADVersion>2023</AutoCADVersion>
+    <AcCoreMgdVersion>8.0.0</AcCoreMgdVersion>
+    <AcDbMgdVersion>8.0.0</AcDbMgdVersion>
+    <AcMgdVersion>8.0.0</AcMgdVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetAutoCAD)' == '2024'">
+    <AutoCADVersion>2024</AutoCADVersion>
+    <AcCoreMgdVersion>9.0.0</AcCoreMgdVersion>
+    <AcDbMgdVersion>9.0.0</AcDbMgdVersion>
+    <AcMgdVersion>9.0.0</AcMgdVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetAutoCAD)' == '2025'">
+    <AutoCADVersion>2025</AutoCADVersion>
+    <AcCoreMgdVersion>10.0.0</AcCoreMgdVersion>
+    <AcDbMgdVersion>10.0.0</AcDbMgdVersion>
+    <AcMgdVersion>10.0.0</AcMgdVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetAutoCAD)' == '2026'">
+    <AutoCADVersion>2026</AutoCADVersion>
+    <AcCoreMgdVersion>11.0.0</AcCoreMgdVersion>
+    <AcDbMgdVersion>11.0.0</AcDbMgdVersion>
+    <AcMgdVersion>11.0.0</AcMgdVersion>
+  </PropertyGroup>
+
+  <!-- Default to 2026 if not specified -->
+  <PropertyGroup Condition="'$(TargetAutoCAD)' == ''">
+    <TargetAutoCAD>2026</TargetAutoCAD>
+    <AutoCADVersion>2026</AutoCADVersion>
+    <AcCoreMgdVersion>11.0.0</AcCoreMgdVersion>
+    <AcDbMgdVersion>11.0.0</AcDbMgdVersion>
+    <AcMgdVersion>11.0.0</AcMgdVersion>
+  </PropertyGroup>
+
+  <!-- Dependencies -->
+  <ItemGroup>
+    <!-- AutoCAD .NET API References (optional for compilation without AutoCAD SDK) -->
+    <PackageReference Include="AcCoreMgd" Version="$(AcCoreMgdVersion)" />
+    <PackageReference Include="AcDbMgd" Version="$(AcDbMgdVersion)" />
+    <PackageReference Include="AcMgd" Version="$(AcMgdVersion)" />
+    
+    <!-- Graphics -->
+    <PackageReference Include="SkiaSharp" Version="2.88.8" />
+    <PackageReference Include="SkiaSharp.Views.WPF" Version="2.88.8" />
+    
+    <!-- UI -->
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+  </ItemGroup>
+
+  <!-- Build Configuration -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Output Settings -->
+  <PropertyGroup>
+    <OutputPath>bin\$(Configuration)\$(TargetAutoCAD)\</OutputPath>
+    <AppendTargetFrameworkVersionToOutputPath>false</AppendTargetFrameworkVersionToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+  </PropertyGroup>
+
+</Project>
