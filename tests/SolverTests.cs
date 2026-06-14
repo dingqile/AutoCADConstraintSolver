@@ -4,6 +4,8 @@ using AutoCADConstraintSolver.Geometry;
 using AutoCADConstraintSolver.Sketch;
 using AutoCADConstraintSolver.Solver;
 using AutoCADConstraintSolver.Constraints;
+using AutoCADConstraintSolver.Features;
+using System.Collections.Generic;
 
 namespace AutoCADConstraintSolver.Tests;
 
@@ -1036,3 +1038,157 @@ public class ConstraintSolverTests
 
     #endregion
 }
+
+#region Additional Entity Tests
+
+public class EllipseEntityTests
+{
+    [Fact]
+    public void EllipseEntity_Create_Works()
+    {
+        var ellipse = new EllipseEntity(new Vec2(0, 0), 10, 5, 0);
+
+        Assert.Equal(10, ellipse.RadiusXValue, 6);
+        Assert.Equal(5, ellipse.RadiusYValue, 6);
+        Assert.Equal(0, ellipse.RotationValue, 6);
+    }
+
+    [Fact]
+    public void EllipseEntity_GetPointAt_Works()
+    {
+        var ellipse = new EllipseEntity(new Vec2(0, 0), 10, 5, 0);
+        var point = ellipse.GetPointAt(0);
+
+        Assert.Equal(10, point.X, 6);
+        Assert.Equal(0, point.Y, 6);
+    }
+
+    [Fact]
+    public void EllipseEntity_ToLocal_Works()
+    {
+        var ellipse = new EllipseEntity(new Vec2(5, 5), 10, 5, Math.PI / 4);
+        var worldPoint = new Vec2(15, 5);
+        var local = ellipse.ToLocal(worldPoint);
+
+        Assert.NotNull(local);
+    }
+}
+
+public class SplineEntityTests
+{
+    [Fact]
+    public void SplineEntity_Create_Works()
+    {
+        var points = new[] { new Vec2(0, 0), new Vec2(5, 5), new Vec2(10, 0) };
+        var spline = new SplineEntity(points, 2);
+
+        Assert.Equal(2, spline.Degree);
+        Assert.Equal(3, spline.ControlPoints.Count);
+    }
+
+    [Fact]
+    public void SplineEntity_Evaluate_Works()
+    {
+        var points = new[] { new Vec2(0, 0), new Vec2(5, 5), new Vec2(10, 0) };
+        var spline = new SplineEntity(points, 2);
+        var point = spline.Evaluate(0.5);
+
+        Assert.NotNull(point);
+    }
+}
+
+public class FunctionEntityTests
+{
+    [Fact]
+    public void FunctionEntity_Create_Works()
+    {
+        var func = new FunctionEntity(new Vec2(0, 0), -10, 10, "x*x");
+
+        Assert.Equal(-10, func.XMin, 6);
+        Assert.Equal(10, func.XMax, 6);
+        Assert.Equal("x*x", func.FunctionExpression);
+    }
+
+    [Fact]
+    public void FunctionEntity_Evaluate_Polynomial()
+    {
+        var func = new FunctionEntity(new Vec2(0, 0), -10, 10, "2*x+1");
+        var result = func.Evaluate(5);
+
+        Assert.Equal(11, result, 6);
+    }
+}
+
+#endregion
+
+#region Feature Tests
+
+public class FeatureTests
+{
+    [Fact]
+    public void ExtrusionFeature_Create_Works()
+    {
+        var profile = new List<Entity>
+        {
+            new LineEntity(new Vec2(0, 0), new Vec2(10, 0)),
+            new LineEntity(new Vec2(10, 0), new Vec2(10, 10)),
+            new LineEntity(new Vec2(10, 10), new Vec2(0, 10)),
+            new LineEntity(new Vec2(0, 10), new Vec2(0, 0))
+        };
+
+        var extrusion = new ExtrusionFeature(profile, 20);
+
+        Assert.Equal(20, extrusion.Distance, 6);
+        Assert.True(extrusion.Solid);
+        Assert.Equal(4, extrusion.Profile.Count);
+    }
+
+    [Fact]
+    public void RevolutionFeature_Create_Works()
+    {
+        var profile = new List<Entity>
+        {
+            new LineEntity(new Vec2(0, 0), new Vec2(10, 0)),
+            new LineEntity(new Vec2(10, 0), new Vec2(10, 10)),
+            new LineEntity(new Vec2(10, 10), new Vec2(0, 0))
+        };
+
+        var revolution = new RevolutionFeature(profile, new Vec3(0, 0, 0), new Vec3(0, 0, 1), 360);
+
+        Assert.Equal(360, revolution.EndAngle, 6);
+        Assert.True(revolution.Solid);
+        Assert.True(revolution.IsFullRevolution());
+    }
+
+    [Fact]
+    public void BoxFeature_Create_Works()
+    {
+        var box = new BoxFeature(new Vec3(0, 0, 0), 10, 20, 30);
+
+        Assert.Equal(10, box.Width, 6);
+        Assert.Equal(20, box.Height, 6);
+        Assert.Equal(30, box.Depth, 6);
+        Assert.Equal(new Vec3(5, 10, 15), box.Center);
+    }
+
+    [Fact]
+    public void CylinderFeature_Create_Works()
+    {
+        var cylinder = new CylinderFeature(new Vec3(0, 0, 0), 5, 20);
+
+        Assert.Equal(5, cylinder.Radius, 6);
+        Assert.Equal(20, cylinder.Height, 6);
+        Assert.Equal(new Vec3(0, 0, 20), cylinder.TopCenter);
+    }
+
+    [Fact]
+    public void SphereFeature_Create_Works()
+    {
+        var sphere = new SphereFeature(new Vec3(0, 0, 0), 10);
+
+        Assert.Equal(10, sphere.Radius, 6);
+        Assert.Equal(new Vec3(0, 0, 0), sphere.Center);
+    }
+}
+
+#endregion
