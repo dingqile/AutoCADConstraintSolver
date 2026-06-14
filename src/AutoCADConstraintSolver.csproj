@@ -11,7 +11,7 @@
     <Authors>AutoCADConstraintSolver Contributors</Authors>
     <Company>AutoCADConstraintSolver</Company>
     <Product>AutoCAD Constraint Solver</Product>
-    <Description>A parametric constraint solver plugin for AutoCAD, ported from NoteCAD</Description>
+    <Description>A parametric constraint solver plugin for AutoCAD</Description>
     <Copyright>Copyright (c) 2026</Copyright>
     <PackageProjectUrl>https://github.com/dingqile/AutoCADConstraintSolver</PackageProjectUrl>
     <RepositoryUrl>https://github.com/dingqile/AutoCADConstraintSolver</RepositoryUrl>
@@ -74,7 +74,7 @@
 
   <!-- Dependencies -->
   <ItemGroup>
-    <!-- AutoCAD .NET API References (optional for compilation without AutoCAD SDK) -->
+    <!-- AutoCAD .NET API References -->
     <PackageReference Include="AcCoreMgd" Version="$(AcCoreMgdVersion)" />
     <PackageReference Include="AcDbMgd" Version="$(AcDbMgdVersion)" />
     <PackageReference Include="AcMgd" Version="$(AcMgdVersion)" />
