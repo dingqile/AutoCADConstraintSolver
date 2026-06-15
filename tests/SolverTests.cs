@@ -1192,3 +1192,362 @@ public class FeatureTests
 }
 
 #endregion
+
+#region Additional Constraint Tests
+
+public class AdditionalConstraintTests
+{
+    #region Circles Distance Constraint Tests
+
+    [Fact]
+    public void CirclesDistanceConstraint_Outside_Solves()
+    {
+        var system = new EquationSystem();
+        var c1 = new CircleEntity(new Vec2(0, 0), 10);
+        var c2 = new CircleEntity(new Vec2(50, 0), 15);
+
+        var constraint = new CirclesDistanceConstraint(c1, c2, 10, CirclesDistanceConstraint.DistanceOption.Outside);
+
+        c1.SetupEquations(system);
+        c2.SetupEquations(system);
+        constraint.SetupEquations(system);
+
+        var result = system.Solve();
+
+        Assert.Equal(SolveResult.OKAY, result);
+
+        // Verify: center distance - r1 - r2 should equal 10
+        var centerDist = Vec2.Distance(c1.CenterPosition, c2.CenterPosition);
+        Assert.Equal(10, centerDist - c1.RadiusValue - c2.RadiusValue, 1);
+    }
+
+    [Fact]
+    public void CirclesDistanceConstraint_ArcCircle_Solves()
+    {
+        var system = new EquationSystem();
+        var arc = new ArcEntity(new Vec2(0, 0), 10, 0, Math.PI);
+        var circle = new CircleEntity(new Vec2(50, 0), 15);
+
+        var constraint = new CirclesDistanceConstraint(arc, circle, 10, CirclesDistanceConstraint.DistanceOption.Outside);
+
+        arc.SetupEquations(system);
+        circle.SetupEquations(system);
+        constraint.SetupEquations(system);
+
+        var result = system.Solve();
+
+        Assert.Equal(SolveResult.OKAY, result);
+    }
+
+    #endregion
+
+    #region Line Circle Distance Constraint Tests
+
+    [Fact]
+    public void LineCircleDistanceConstraint_Solves()
+    {
+        var system = new EquationSystem();
+        var line = new LineEntity(new Vec2(0, 0), new Vec2(10, 0));
+        var circle = new CircleEntity(new Vec2(5, 20), 10);
+
+        var constraint = new LineCircleDistanceConstraint(line, circle, 5, LineCircleDistanceConstraint.LineCircleOption.Default);
+
+        line.SetupEquations(system);
+        circle.SetupEquations(system);
+        constraint.SetupEquations(system);
+
+        var result = system.Solve();
+
+        Assert.Equal(SolveResult.OKAY, result);
+    }
+
+    #endregion
+
+    #region Concentric Constraint Tests
+
+    [Fact]
+    public void ConcentricConstraint_CircleCircle_Solves()
+    {
+        var system = new EquationSystem();
+        var c1 = new CircleEntity(new Vec2(50, 50), 20);
+        var c2 = new CircleEntity(new Vec2(50, 60), 15);
+
+        var constraint = new ConcentricConstraint(c1, c2);
+
+        c1.SetupEquations(system);
+        c2.SetupEquations(system);
+        constraint.SetupEquations(system);
+
+        var result = system.Solve();
+
+        Assert.Equal(SolveResult.OKAY, result);
+
+        // Centers should be coincident
+        var dx = c1.CenterPosition.X - c2.CenterPosition.X;
+        var dy = c1.CenterPosition.Y - c2.CenterPosition.Y;
+        Assert.Equal(0, Math.Sqrt(dx * dx + dy * dy), 1);
+    }
+
+    [Fact]
+    public void ConcentricConstraint_CircleArc_Solves()
+    {
+        var system = new EquationSystem();
+        var circle = new CircleEntity(new Vec2(50, 50), 20);
+        var arc = new ArcEntity(new Vec2(60, 60), 15, 0, Math.PI);
+
+        var constraint = new ConcentricConstraint(circle, arc);
+
+        circle.SetupEquations(system);
+        arc.SetupEquations(system);
+        constraint.SetupEquations(system);
+
+        var result = system.Solve();
+
+        Assert.Equal(SolveResult.OKAY, result);
+    }
+
+    #endregion
+
+    #region Midpoint Constraint Tests
+
+    [Fact]
+    public void MidpointConstraint_Solves()
+    {
+        var system = new EquationSystem();
+        var p = new PointEntity(50, 50);
+        var line = new LineEntity(new Vec2(0, 0), new Vec2(100, 100));
+
+        var constraint = new MidpointConstraint(p, line);
+
+        p.SetupEquations(system);
+        line.SetupEquations(system);
+        constraint.SetupEquations(system);
+
+        var result = system.Solve();
+
+        Assert.Equal(SolveResult.OKAY, result);
+
+        // Point should be at midpoint
+        var midX = (line.StartPosition.X + line.EndPosition.X) / 2;
+        var midY = (line.StartPosition.Y + line.EndPosition.Y) / 2;
+        Assert.Equal(midX, p.Position.X, 1);
+        Assert.Equal(midY, p.Position.Y, 1);
+    }
+
+    #endregion
+
+    #region Tangent Constraint Tests
+
+    [Fact]
+    public void TangentConstraint_CircleLine_Solves()
+    {
+        var system = new EquationSystem();
+        var line = new LineEntity(new Vec2(0, 0), new Vec2(10, 0));
+        var circle = new CircleEntity(new Vec2(5, 15), 10);
+
+        var constraint = new TangentConstraint(line, circle);
+
+        line.SetupEquations(system);
+        circle.SetupEquations(system);
+        constraint.SetupEquations(system);
+
+        var result = system.Solve();
+
+        Assert.Equal(SolveResult.OKAY, result);
+
+        // Distance from line to circle center should equal radius
+        var distToCenter = circle.CenterPosition.DistanceTo(line.ClosestPoint(circle.CenterPosition));
+        Assert.Equal(circle.RadiusValue, distToCenter, 1);
+    }
+
+    [Fact]
+    public void TangentConstraint_ArcLine_Solves()
+    {
+        var system = new EquationSystem();
+        var line = new LineEntity(new Vec2(0, 0), new Vec2(10, 0));
+        var arc = new ArcEntity(new Vec2(5, 15), 10, 0, Math.PI);
+
+        var constraint = new TangentConstraint(line, arc);
+
+        line.SetupEquations(system);
+        arc.SetupEquations(system);
+        constraint.SetupEquations(system);
+
+        var result = system.Solve();
+
+        Assert.Equal(SolveResult.OKAY, result);
+    }
+
+    #endregion
+
+    #region Equal Radius Constraint Tests
+
+    [Fact]
+    public void EqualRadiusConstraint_Circles_Solves()
+    {
+        var system = new EquationSystem();
+        var c1 = new CircleEntity(new Vec2(0, 0), 20);
+        var c2 = new CircleEntity(new Vec2(100, 0), 10);
+
+        var constraint = new EqualRadiusConstraint(c1, c2);
+
+        c1.SetupEquations(system);
+        c2.SetupEquations(system);
+        constraint.SetupEquations(system);
+
+        var result = system.Solve();
+
+        Assert.Equal(SolveResult.OKAY, result);
+
+        // Radii should be equal
+        Assert.Equal(c1.RadiusValue, c2.RadiusValue, 1);
+    }
+
+    [Fact]
+    public void EqualRadiusConstraint_CircleArc_Solves()
+    {
+        var system = new EquationSystem();
+        var circle = new CircleEntity(new Vec2(0, 0), 20);
+        var arc = new ArcEntity(new Vec2(100, 0), 10, 0, Math.PI);
+
+        var constraint = new EqualRadiusConstraint(circle, arc);
+
+        circle.SetupEquations(system);
+        arc.SetupEquations(system);
+        constraint.SetupEquations(system);
+
+        var result = system.Solve();
+
+        Assert.Equal(SolveResult.OKAY, result);
+    }
+
+    #endregion
+}
+
+#endregion
+
+#region Constraint System Tests
+
+public class ConstraintSystemIntegrationTests
+{
+    [Fact]
+    public void Sketch_ComplexGeometry_Solves()
+    {
+        var sketch = new Sketch();
+
+        // Create a complex geometry: triangle with inscribed circle
+        var p1 = new PointEntity(0, 0);
+        var p2 = new PointEntity(100, 0);
+        var p3 = new PointEntity(50, 80);
+
+        var l1 = new LineEntity(p1, p2);
+        var l2 = new LineEntity(p2, p3);
+        var l3 = new LineEntity(p3, p1);
+
+        sketch.AddEntity(l1);
+        sketch.AddEntity(l2);
+        sketch.AddEntity(l3);
+
+        // Create inscribed circle
+        var circle = new CircleEntity(new Vec2(50, 25), 10);
+        sketch.AddEntity(circle);
+
+        // Add constraints
+        sketch.AddConstraint(new HorizontalConstraint(l1));
+        sketch.AddConstraint(new ParallelConstraint(l2, l3)); // Isosceles
+        // Skip redundant constraint
+
+        // Fix base
+        sketch.AddConstraint(new FixationConstraint(p1, new Vec2(0, 0)));
+        sketch.AddConstraint(new FixationConstraint(p2, new Vec2(100, 0)));
+
+        // Make circle tangent to all sides
+        sketch.AddConstraint(new TangentConstraint(l1, circle));
+        sketch.AddConstraint(new TangentConstraint(l2, circle));
+        sketch.AddConstraint(new TangentConstraint(l3, circle));
+
+        var result = sketch.Solve();
+        Assert.Equal(SolveResult.OKAY, result);
+    }
+
+    [Fact]
+    public void Sketch_FullyConstrained_Case()
+    {
+        var sketch = new Sketch();
+
+        // Create a square with diagonal
+        var p1 = new PointEntity(0, 0);
+        var p2 = new PointEntity(100, 0);
+        var p3 = new PointEntity(100, 100);
+        var p4 = new PointEntity(0, 100);
+
+        var l1 = new LineEntity(p1, p2);
+        var l2 = new LineEntity(p2, p3);
+        var l3 = new LineEntity(p3, p4);
+        var l4 = new LineEntity(p4, p1);
+        var diagonal = new LineEntity(p1, p3);
+
+        sketch.AddEntity(l1);
+        sketch.AddEntity(l2);
+        sketch.AddEntity(l3);
+        sketch.AddEntity(l4);
+        sketch.AddEntity(diagonal);
+
+        // Square constraints
+        sketch.AddConstraint(new HorizontalConstraint(l1));
+        sketch.AddConstraint(new HorizontalConstraint(l3));
+        sketch.AddConstraint(new VerticalConstraint(l2));
+        sketch.AddConstraint(new VerticalConstraint(l4));
+        sketch.AddConstraint(new EqualLengthConstraint(l1, l2));
+
+        // Diagonal constraints
+        sketch.AddConstraint(new CoincidentConstraint(diagonal.Start as PointEntity, p1));
+        sketch.AddConstraint(new CoincidentConstraint(diagonal.End as PointEntity, p3));
+
+        // Fix origin
+        sketch.AddConstraint(new FixationConstraint(p1, new Vec2(0, 0)));
+
+        var result = sketch.Solve();
+        Assert.Equal(SolveResult.OKAY, result);
+
+        // Verify diagonal length
+        Assert.Equal(l1.Length * Math.Sqrt(2), diagonal.Length, 1);
+    }
+
+    [Fact]
+    public void DegreesOfFreedom_Calculation_Accurate()
+    {
+        var sketch = new Sketch();
+
+        // Add 3 lines = 12 DOF (each line has 4 DOF)
+        var p1 = new PointEntity(0, 0);
+        var p2 = new PointEntity(100, 0);
+        var p3 = new PointEntity(100, 100);
+        var p4 = new PointEntity(0, 100);
+
+        sketch.AddEntity(new LineEntity(p1, p2)); // 4 DOF
+        sketch.AddEntity(new LineEntity(p2, p3)); // 4 DOF
+        sketch.AddEntity(new LineEntity(p3, p4)); // 4 DOF
+
+        // Total DOF = 12
+        Assert.Equal(12, sketch.GetDegreesOfFreedom());
+
+        // Add parallel constraint (1 DOF)
+        sketch.AddConstraint(new ParallelConstraint(
+            (LineEntity)sketch.Entities.ElementAt(0),
+            (LineEntity)sketch.Entities.ElementAt(2)));
+
+        // DOF = 12 - 1 = 11
+        Assert.Equal(11, sketch.GetDegreesOfFreedom());
+
+        // Add equal length constraint (1 DOF)
+        sketch.AddConstraint(new EqualLengthConstraint(
+            (LineEntity)sketch.Entities.ElementAt(0),
+            (LineEntity)sketch.Entities.ElementAt(1)));
+
+        // DOF = 11 - 1 = 10
+        Assert.Equal(10, sketch.GetDegreesOfFreedom());
+    }
+}
+
+#endregion

@@ -108,9 +108,15 @@ public abstract class DimensionalConstraint : Constraint
     public double Value { get; set; }
     public bool IsDriving { get; set; } = true;
     
-    public override bool IsDriving1 => IsDriving;
+    /// <summary>
+    /// Check if this is a driving constraint (vs. reference)
+    /// </summary>
+    public virtual bool IsDriving1 => IsDriving;
     
-    public override double Value1 
+    /// <summary>
+    /// Get or set the constraint value
+    /// </summary>
+    public virtual double Value1 
     { 
         get => Value; 
         set => Value = value; 

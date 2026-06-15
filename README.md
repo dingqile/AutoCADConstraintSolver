@@ -8,6 +8,8 @@
 - 直线、圆弧、圆、椭圆、椭圆弧
 - 样条曲线
 - 点、文本
+- 函数曲线 (y = f(x))
+- 偏移实体
 
 ### 几何约束
 - **重合约束 (Coincident)** - 点与点重合
@@ -20,6 +22,12 @@
 - **距离约束 (Distance)** - 点-点、点-直线、点-圆、线-线、线-圆、圆-圆距离
 - **长度/直径约束 (Length/Diameter)** - 设定线段长度或圆的直径
 - **角度约束 (Angle)** - 两直线间的角度
+- **中点约束 (Midpoint)** - 点的中点位置
+- **同心约束 (Concentric)** - 圆/弧共享圆心
+- **等半径约束 (Equal Radius)** - 两圆/弧半径相等
+- **对称约束 (Symmetric)** - 点或线的对称关系
+- **圆-圆距离约束 (Circles Distance)** - 两圆之间的最小距离
+- **线-圆距离约束 (Line-Circle Distance)** - 直线到圆的距离
 
 ### 工程约束
 - **等式约束** - 自定义参数间的数学关系
@@ -43,6 +51,7 @@ AutoCADConstraintSolver/
 │   └── Commands/           # AutoCAD命令
 ├── tests/                   # 单元测试
 ├── docs/                    # 文档
+│   └── DesignAndUserGuide.md  # 设计思路与用户使用说明
 └── scripts/                # 构建脚本
 ```
 
